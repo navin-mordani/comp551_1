@@ -19,7 +19,5 @@ for i in range(0, numCols/6):
         nf = nf.append(sub)
 
 nf = nf[pd.notnull(nf['EVENT DATE'])]
-
-nf.to_csv('out.csv')
-
-print(nf)
+nf = nf.sort('PARTICIPANT ID')
+nf.to_csv('out.csv', index=False)
