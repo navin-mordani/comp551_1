@@ -40,5 +40,5 @@ for i in users.index:
 
 outFrame[['PARTICIPANT ID', 'GENDER', 'TOTAL_EVENTS', 'THERE15', 'THERE14', 'THERE13', 'THERE12']] = outFrame[['PARTICIPANT ID', 'GENDER', 'TOTAL_EVENTS', 'THERE15', 'THERE14', 'THERE13', 'THERE12']].astype(int)
 #nf = nf[nf['EVENT NAME'].str.contains('Marathon Oasis')]
-outFrame.to_csv('out2.csv', index=False)
+#outFrame.to_csv('out2.csv', index=False)
 print(outFrame)
