@@ -32,7 +32,10 @@ for i in users.index:
             gender = 1
         times = participantEvents[ participantEvents['EVENT TYPE']=='Marathon']['TIME']
         times = times.apply(timeToSeconds)
-        times = times.mean()
+        if len(times) == 0:
+            times = 6*3600
+        else:
+            times = times.mean()
 
         outFrame.loc[users.ix[i]['PARTICIPANT ID']] = [users.ix[i]['PARTICIPANT ID'], gender, total, was2015, was2014, was2013, was2012, times]
     except:
