@@ -28,7 +28,7 @@ class LogisticR:
             total += self.dErr(X.loc[i], y.loc[i])
         return total/self.n #TODO: Taking the average prevents overflow error
 
-    def train (self, X, y, alpha):
+    def train (self, X, y, alpha, errThres):
         X.insert(0, 'INTERCEPT', 1)
         # Number of features in model
         self.m = len(X.columns)
@@ -37,11 +37,15 @@ class LogisticR:
         # Weights vector
         self.w = pd.Series([0] * self.m, index=X.columns)
 
-        for i in range(300):
+        errorThresholdAttained = False
+        while not errorThresholdAttained:
             #print("Iteration: " + str(i))
             es = self.sumError(X, y)
             es = es.multiply(alpha)
+            if (es.abs() <= errThres).all():
+                errorThresholdAttained = True
             self.w = self.w - es
+        print(self.w)
 
     def predict (self, X):
         X.insert(0, 'INTERCEPT', 1)
@@ -49,7 +53,7 @@ class LogisticR:
 
 
 lr = LogisticR()
-lr.train(data[:2000], y, 0.15)
+lr.train(data[:2000], y, 0.15, 0.003)
 pre = lr.predict(data[2001:3000])
 res = pre.round() == y[2001:3000]
 print(res.sum()/float(1000))

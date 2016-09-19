@@ -9,6 +9,8 @@ y = data['THERE15']
 data.drop('THERE15', axis=1, inplace=True)
 data.drop('PARTICIPANT ID', axis=1, inplace=True)
 
+LAPLACE_SMOOTHING = 1
+
 class LogisticR:
     def __init__(self):
         return
@@ -54,8 +56,8 @@ class LogisticR:
         categories = col.drop_duplicates()
         xSeries = pd.Series()
         for cat in categories:
-            catCount = len(col[(col == cat) & (y == k)])
-            xSeries.loc[cat] = catCount/float(self.kCount[k])
+            catCount = len(col[(col == cat) & (y == k)]) + LAPLACE_SMOOTHING
+            xSeries.loc[cat] = catCount/float(self.kCount[k]+ (LAPLACE_SMOOTHING*len(categories)))
         return xSeries
 
     def train (self, X, y, types):
@@ -63,7 +65,6 @@ class LogisticR:
         # Number of features in model
         self.m = len(X.columns)
         self.mNames = X.columns
-        print(self.mNames)
         # Size of dataset
         self.n = len(X.index)
 
@@ -86,7 +87,6 @@ class LogisticR:
                 denom += self.pYProdPXY(k,X.ix[x])
             for k in self.outcomes:
                 out.loc[x,k] = self.pYProdPXY(k,X.ix[x])/float(denom)
-        print(out)
         return out
 
     def pYProdPXY (self, k, x):
@@ -98,8 +98,36 @@ class LogisticR:
         prod *= self.kProb[k]
         return prod
 
+    def crossValidation (self, X, y, types, k):
+        perm = np.random.permutation(len(X))
+        X, y = pd.Series(np.array_split(X.iloc[perm], k)), pd.Series(np.array_split(y.iloc[perm], k))
+        error = 0
+        trueError = 0
+        for i in range(k):
+            mask = [True]*k
+            mask[i] = False
+            trainDataX, trainDataY = pd.concat(list(X[mask])), pd.concat(list(y[mask]))
+            validateDataX, validateDataY = X[i], y[i]
+            self.train(trainDataX, trainDataY, types)
+            validateResult = self.predict(validateDataX)
+            errSum = 0
+            for i in validateDataY.index:
+                errSum += validateResult.ix[i][validateDataY[i]]
+            e = (validateResult[1].round() == validateDataY).sum()/float(len(validateDataY))
+            error += e
+            te = errSum/float(len(validateDataY))
+            trueError += te
+        error = error/float(k)
+        trueError = trueError/float(k)
+        print(error)
+        print(trueError)
+
+
+
 lr = LogisticR()
-lr.train(data[:2000], y, pd.Series(['d','c','d','d','d','c']))
-out = lr.predict(data[2001:3000])
-res = out[1].round() == y[2001:3000]
-print(res.sum()/float(1000))
+lr.crossValidation(data, y, pd.Series(['d','c','d','d','d','c']), 5)
+
+#lr.train(data[:2000], y, pd.Series(['d'data,'c','d','d','d','c']))
+#out = lr.predict(data[2001:3000])
+#res = out[1].round() == y[2001:3000]
+#print(res.sum()/float(1000))
