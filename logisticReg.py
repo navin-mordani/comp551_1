@@ -41,27 +41,30 @@ class LogisticR:
         self.w = pd.Series([0] * self.m, index=X.columns)
 
         errorThresholdAttained = False
+        count = 0
         while not errorThresholdAttained:
+            count += 1
             #print("Iteration: " + str(i))
             es = self.sumError(X, y)
-            es = es.multiply(alpha)
-            if (es.abs() <= errThres).all():
+            if count%10 == 0:
+                print(es.divide(self.n))
+                print(self.w)
+            if es.abs().mean() <= errThres*self.n or count > 300:
                 errorThresholdAttained = True
+            es = es.multiply(alpha).divide(self.n)
             self.w = self.w - es
-            print(es)
+
+
+        print(count)
 
     def predict (self, X):
         res= X.dot(self.w).apply(self.sigma)
-        print(res)
-        print((res >= 0.5 ).sum())
-        return res
 
     def crossValidation (self, X, y, alpha, errThres, k):
         perm = np.random.permutation(len(X))
-        X.insert(0, 'INTERCEPT', 1)
         X, y = pd.Series(np.array_split(X.iloc[perm], k)), pd.Series(np.array_split(y.iloc[perm], k))
-        error = 0
-        trueError = 0
+        train = 0
+        validate = 0
         for i in range(k):
             mask = [True]*k
             mask[i] = False
@@ -74,12 +77,15 @@ class LogisticR:
             trainResult = (trainResult >= 0.5) == trainDataY
             traine = trainResult.sum()/float(len(trainDataY))
             vale = validateResult.sum()/float(len(validateDataY))
-            return traine, vale
+            train += traine
+            validate += vale
+        return train/float(k), validate/float(k)
 
 
 lr = LogisticR()
 data.insert(0, 'INTERCEPT', 1)
 data15.insert(0, 'INTERCEPT', 1)
+'''
 lr.train(data, y, 0.001, 0.003)
 t3 = data['THERE13']
 t4 = data['THERE14']
@@ -92,20 +98,24 @@ data15.insert(0, 'THERE14', y)
 lr.predict(data15)
 #lr.crossValidation(data[:1000], y[:1000], 0.01, 0.003, 5)
 '''
+np.random.seed(23)
+perm = np.random.permutation(len(data))
+data, y = data.iloc[perm], y.iloc[perm]
+
 trainea = []
 valea = []
-for i in range(5, 15, 1):
-    traine, vale = lr.crossValidation(data[:1000], y[:1000], i/float(100), 0.004, 5)
-    trainea.append(traine)
-    valea.append(vale)
+for i in range(1):
+    traine, vale = lr.crossValidation(data[:1000], y[:1000], 0.1, 0.05, 5)
+    print(traine)
+    print(vale)
 
 import matplotlib.pyplot as plt
 
 x = range(1, 10, 1)
 # red dashes, blue squares and green triangles
-plt.plot(x, trainea, 'r--', x, valea , 'b--')
-plt.show()
-'''
+#plt.plot(x, trainea, 'r--', x, valea , 'b--')
+#plt.show()
+
 #pre = lr.predict(data[2001:3000])
 #res = pre.round() == y[2001:3000]
 #print(res.sum()/float(1000))

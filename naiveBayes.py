@@ -126,6 +126,8 @@ class LogisticR:
 
             trainE, trainTrueE = self.calculateError(trainResult, trainDataY)
             validateE, validateTrueE = self.calculateError(validateResult, validateDataY)
+            print(trainE)
+            print(validateE)
             trainError += trainE
             trainTrueError += trainTrueE
             validateError += validateE
