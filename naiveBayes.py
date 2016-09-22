@@ -102,11 +102,19 @@ class LogisticR:
         prod *= self.kProb[k]
         return prod
 
+    def calculateError(self, result, Y):
+        errSum = 0
+        for i in Y.index:
+            errSum += result.ix[i][Y[i]]
+        error = (result[1].round() == Y).sum()/float(len(Y))
+        trueError = errSum/float(len(Y))
+        return error, trueError
+
     def crossValidation (self, X, y, types, k):
         perm = np.random.permutation(len(X))
         X, y = pd.Series(np.array_split(X.iloc[perm], k)), pd.Series(np.array_split(y.iloc[perm], k))
-        error = 0
-        trueError = 0
+        trainError, trainTrueError = 0, 0
+        validateError, validateTrueError = 0, 0
         for i in range(k):
             mask = [True]*k
             mask[i] = False
@@ -114,22 +122,30 @@ class LogisticR:
             validateDataX, validateDataY = X[i], y[i]
             self.train(trainDataX, trainDataY, types)
             validateResult = self.predict(validateDataX)
-            errSum = 0
-            for i in validateDataY.index:
-                errSum += validateResult.ix[i][validateDataY[i]]
-            e = (validateResult[1].round() == validateDataY).sum()/float(len(validateDataY))
-            error += e
-            te = errSum/float(len(validateDataY))
-            trueError += te
-        error = error/float(k)
-        trueError = trueError/float(k)
-        print(error)
-        print(trueError)
+            trainResult = self.predict(trainDataX)
+
+            trainE, trainTrueE = self.calculateError(trainResult, trainDataY)
+            validateE, validateTrueE = self.calculateError(validateResult, validateDataY)
+            trainError += trainE
+            trainTrueError += trainTrueE
+            validateError += validateE
+            validateTrueError += validateTrueE
+
+        print('--- Training ---')
+        print('Error rate:')
+        print(1 - trainError/float(k))
+        print('True Error:')
+        print(1 - trainTrueError/float(k))
+        print('--- Validation ---')
+        print('Error rate:')
+        print(1 - validateError/float(k))
+        print('True Error:')
+        print(1 - validateTrueError/float(k))
 
 
 
 lr = LogisticR()
-lr.crossValidation(data, y, pd.Series(['d','c','d','d','d','c']), 5)
+lr.crossValidation(data, y, pd.Series(['d','c','d','d','d','c']), 10)
 
 #lr.train(data[:2000], y, pd.Series(['d'data,'c','d','d','d','c']))
 #out = lr.predict(data[2001:3000])
