@@ -3,20 +3,14 @@ import numpy as np
 import math
 import scipy.stats
 
-data = pd.read_csv("out2.csv", low_memory=False)
-
-y = data['THERE15']
-data.drop('THERE15', axis=1, inplace=True)
-data.drop('PARTICIPANT ID', axis=1, inplace=True)
-
 LAPLACE_SMOOTHING = 1
 
-class LogisticR:
+class NaiveB:
     def __init__(self):
         return
 
     def calculateProbabilities(self):
-        self.possibleOutcomes = y.drop_duplicates()
+        self.possibleOutcomes = self.y.drop_duplicates()
         # Discrete data
         self.kProbabilities = pd.Series()
         # Continuous data
@@ -43,7 +37,7 @@ class LogisticR:
         categories = col.drop_duplicates() # Possible values for the feature
         categoryProbabilites = pd.Series()
         for cat in categories:
-            catCount = len(col[(col == cat) & (y == k)]) + LAPLACE_SMOOTHING # Count of occurences of a category in the feature
+            catCount = len(col[(col == cat) & (self.y == k)]) + LAPLACE_SMOOTHING # Count of occurences of a category in the feature
             categoryProbabilites.loc[cat] = catCount/float(self.kCount[k] + (LAPLACE_SMOOTHING*len(categories)))
         return categoryProbabilites
 
@@ -145,11 +139,8 @@ class LogisticR:
         print(1 - validateTrueError/float(k))
 
 
-
-lr = LogisticR()
-lr.crossValidation(data, y, pd.Series(['d','c','d','d','d','c']), 10)
-
-#lr.train(data[:2000], y, pd.Series(['d'data,'c','d','d','d','c']))
-#out = lr.predict(data[2001:3000])
-#res = out[1].round() == y[2001:3000]
-#print(res.sum()/float(1000))
+'''
+# ------------------------------------------------------------------------------
+# Test with cross validation
+NaiveB.crossValidation(data, y, pd.Series(['d','c','d','d','d','c']), 10)
+'''
