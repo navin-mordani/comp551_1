@@ -139,8 +139,27 @@ class NaiveB:
         print(1 - validateTrueError/float(k))
 
 
-'''
-# ------------------------------------------------------------------------------
-# Test with cross validation
-NaiveB.crossValidation(data, y, pd.Series(['d','c','d','d','d','c']), 10)
-'''
+data = pd.read_csv("./data/Y1/dataForY1LogiAndNaive.csv", low_memory=False)
+y = data['THERE15']
+data.drop('THERE15', axis=1, inplace=True)
+data.drop('PARTICIPANT ID', axis=1, inplace=True)
+t3 = data['THERE13']
+t4 = data['THERE14']
+print('Running Naive Bayes model...')
+naiveModel = NaiveB()
+naiveModel.train(data, y, pd.Series(['d','c','d','d','d','c']))
+dataB15 = data.copy()
+dataB15.drop('THERE12', axis=1, inplace=True)
+dataB15.drop('THERE13', axis=1, inplace=True)
+dataB15.drop('THERE14', axis=1, inplace=True)
+dataB15.insert(2, 'THERE12', t3)
+dataB15.insert(2, 'THERE13', t4)
+dataB15.insert(2, 'THERE14', y)
+
+naiveModel.train(data, y, pd.Series(['d','c','d','d','d','c']))
+out = naiveModel.predict(dataB15)
+print(out)
+res = out[1].round()
+res.to_csv('bayes.csv', index=True, header=False)
+print(res)
+print(res.sum()/float(1000))

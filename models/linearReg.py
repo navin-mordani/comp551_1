@@ -39,7 +39,7 @@ def LinearRegression(X,y,w):
     ErrorTrain = np.zeros((100,1),dtype = np.double)
     ErrorTest = np.zeros((100,1),dtype = np.double)
     #for j in range(100):
-    for i in range(10000):
+    for i in range(2000):
            w = w-2*((alpha*GradientDescent(X,y,w))/len(X[:,1]))
            Error = Err(X,y,w)
            listErr[i,0] = Error
