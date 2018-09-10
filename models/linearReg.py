@@ -7,16 +7,19 @@ import math
 import sys
 from numpy import genfromtxt
 
+
 def getMatrixFromFile(inputFileName):
-    matrix = genfromtxt(inputFileName, dtype = 'float',delimiter=',',skip_header = 1)
-    matrix = np.round(matrix,2)
+    matrix = genfromtxt(inputFileName, dtype='float', delimiter=',', skip_header=1)
+    matrix = np.round(matrix, 2)
     return matrix
+
 
 def Err(X,y,w):
     prediction = np.dot(X,w)
     difference = np.subtract(y,prediction)
     divisor = (len(X[:,1]))
     return (np.dot(np.transpose(difference),difference))/divisor#Since (y-Xw)^2 = (y-Xw)'(y-Xw)
+
 
 def GradientDescent(X,y,w):
     prediction = np.dot(X,w)
@@ -26,12 +29,14 @@ def GradientDescent(X,y,w):
     difference = np.transpose(difference);
     return difference
 
+
 def NormalEquation(X,y,w):
     xTranspose = np.transpose(X)
     xTransposeXInverse = np.linalg.inv(np.dot(xTranspose,X))
     xTransposeY = (np.dot(xTranspose,y))
     w = np.dot(xTransposeXInverse,xTransposeY)
     return w
+
 
 def LinearRegression(X,y,w):
     alpha = 0.001
@@ -48,19 +53,12 @@ def LinearRegression(X,y,w):
     fig = plt.figure()
     A = np.arange(10000).reshape(10000,1)
     A = np.arange(100).reshape(100,1)
-    #plt.plot(A[:,0],ErrorTrain[:,0],label = 'Training')
-    #plt.plot(A[:,0],ErrorTest[:,0], label = 'Test')
-    #plt.xlabel('Iterations')
-    #plt.ylabel('Loss Function')
-    #plt.ylim(0,1)
-    #plt.xlim(0,100)
-    #plt.legend()
-    #plt.show()
     difference = (np.dot(X,w) - y)
     difference = np.abs(difference)
     #for i in range(len(X[:,1])):
     #    print(difference[i])
     return w
+
 
 def KFoldLinearRegression(X,y,w,K):
     numberOfRecords = len(X[:,1])
@@ -86,6 +84,7 @@ def KFoldLinearRegression(X,y,w,K):
         w = np.zeros((len(X[1,:]),1),dtype = int)
     w = LinearRegression(X,y,w)
     return sumErrMSE / K,sumMeanErrAbsolute / K,w
+
 
 def KFoldClosedMatrixForm(X,y,w,K):
     numberOfRecords = len(X[:,1])
@@ -115,6 +114,7 @@ def Normalize(X):
     X = (X-meanX)/standardDeviation
     return X
 
+
 def correctTimeFormat(timeInSeconds):
     hours = int(timeInSeconds//3600)
     mins  = int((timeInSeconds%3600)//60)
@@ -139,15 +139,16 @@ def correlation(X,y,wLinear):
     plt.grid()
     return np.sum((a) * (b)) / math.sqrt(np.sum(a ** 2) * np.sum(b ** 2))
 
+
 def main():
     #sys.stdout=open("test.txt","w")
     X = getMatrixFromFile('./data/Y2/featureMatrixFinal.csv')
     y = getMatrixFromFile('./data/Y2/vectorY.csv')
-    #The next 2 lines take the traspose of y to generate y vector
+    # The next 2 lines take the traspose of y to generate y vector
     y = y[np.newaxis]
     y = np.transpose(y)
 
-    #Convert the time in seconds to hours for matrix X and output vector Y
+    # Convert the time in seconds to hours for matrix X and output vector Y
     X[:,0:3] = X[:,0:3]/3600
     y = y/3600
 
