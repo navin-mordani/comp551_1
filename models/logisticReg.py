@@ -68,51 +68,103 @@ class LogisticR:
             vale = validateResult.sum()/float(len(validateDataY))
             train += traine
             validate += vale
+	
         return train/float(k), validate/float(k)
 
-'''
-# Prepare data for Logistic and Bayes
-data = pd.read_csv("./data/dataForY1LogiAndNaive.csv", low_memory=False)
-output = pd.DataFrame(index=data.index)
-y = data['THERE15']
 
-#Regularize TOTAL_EVENTS
-data['TOTAL_EVENTS'] = (data['TOTAL_EVENTS'] - data['TOTAL_EVENTS'].mean()) / (data['TOTAL_EVENTS'].max() - data['TOTAL_EVENTS'].min())
+if __name__ == "__main__":
+	import argparse
 
-data.drop('THERE15', axis=1, inplace=True)
-data.drop('AVGTIME', axis=1, inplace=True)
-data.drop('PARTICIPANT ID', axis=1, inplace=True)
-data.insert(0, 'INTERCEPT', 1)
-data15 = data.copy()
-t3 = data['THERE13']
-t4 = data['THERE14']
-data15.drop('THERE12', axis=1, inplace=True)
-data15.drop('THERE13', axis=1, inplace=True)
-data15.drop('THERE14', axis=1, inplace=True)
-data15.insert(0, 'THERE12', t3)
-data15.insert(0, 'THERE13', t4)
-data15.insert(0, 'THERE14', y)
-lr = LogisticR()
-'''
-#-------------------------------------------------------------------------------
-# Make prediction for 2016
-'''
-data.insert(0, 'INTERCEPT', 1)
-data15 = data.copy()
-t3 = data['THERE13']
-t4 = data['THERE14']
-data15.drop('THERE12', axis=1, inplace=True)
-data15.drop('THERE13', axis=1, inplace=True)
-data15.drop('THERE14', axis=1, inplace=True)
-data15.insert(0, 'THERE12', t3)
-data15.insert(0, 'THERE13', t4)
-data15.insert(0, 'THERE14', y)
+	# ------------------------------------------------------------------------------
+	# Prepare data for Logistic and Bayes
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-t', '--trainCSV',type=str, help='CSV file containing training data', required=True)
+	parser.add_argument('-s','--submission',type=str, help='Submission File',required=True)
+	args = parser.parse_args()
+	data = pd.read_csv(args.trainCSV, low_memory=False)#("data/Y1/dataForY1LogiAndNaive.csv", low_memory=False)
+	data = data
+	output = pd.DataFrame(index=data.index)
+	y = data['THERE15']
+	y2 = y.copy()
 
-lr.train(data, y, 1, 0.005)
+	#Regularize TOTAL_EVENTS
+	data['TOTAL_EVENTS'] = (data['TOTAL_EVENTS'] - data['TOTAL_EVENTS'].mean()) / (data['TOTAL_EVENTS'].max() - data['TOTAL_EVENTS'].min())
 
-res = lr.predict(data15)
-res = (res >= 0.5)
-res.to_csv('predictionY1logistic.csv', index=True)
+	dataB = data.copy()
+
+	data.drop('THERE15', axis=1, inplace=True)
+	data.drop('AVGTIME', axis=1, inplace=True)
+	data.drop('PARTICIPANT ID', axis=1, inplace=True)
+
+	data.insert(0, 'INTERCEPT', 1)
+	data15 = data.copy()
+	t3 = data['THERE13']
+	t4 = data['THERE14']
+	data15.drop('THERE12', axis=1, inplace=True)
+	data15.drop('THERE13', axis=1, inplace=True)
+	data15.drop('THERE14', axis=1, inplace=True)
+	data15.insert(3, 'THERE14', y)
+	data15.insert(4, 'THERE13', t4)
+	data15.insert(5, 'THERE12', t3)
+
+	dataB.drop('THERE15', axis=1, inplace=True)
+	dataB.drop('PARTICIPANT ID', axis=1, inplace=True)
+
+
+	# ------------------------------------------------------------------------------
+	# Logistic Regresssion
+	print('Running Logisitic Regression model...')
+	print('This may take some time :( ')
+	logisticModel = LogisticR()
+	logisticModel.train(data[:100], y, 1, 0.005)
+	res = logisticModel.predict(data15[:100])
+	res = res.round()
+	output.insert(0, 'Y1_LOGISTIC', res)
+	output.to_csv(args.submission, index=True, header=False)
+
+	'''
+	# Prepare data for Logistic and Bayes
+	data = pd.read_csv("./data/dataForY1LogiAndNaive.csv", low_memory=False)
+	output = pd.DataFrame(index=data.index)
+	y = data['THERE15']
+
+	#Regularize TOTAL_EVENTS
+	data['TOTAL_EVENTS'] = (data['TOTAL_EVENTS'] - data['TOTAL_EVENTS'].mean()) / (data['TOTAL_EVENTS'].max() - data['TOTAL_EVENTS'].min())
+
+	data.drop('THERE15', axis=1, inplace=True)
+	data.drop('AVGTIME', axis=1, inplace=True)
+	data.drop('PARTICIPANT ID', axis=1, inplace=True)
+	data.insert(0, 'INTERCEPT', 1)
+	data15 = data.copy()
+	t3 = data['THERE13']
+	t4 = data['THERE14']
+	data15.drop('THERE12', axis=1, inplace=True)
+	data15.drop('THERE13', axis=1, inplace=True)
+	data15.drop('THERE14', axis=1, inplace=True)
+	data15.insert(0, 'THERE12', t3)
+	data15.insert(0, 'THERE13', t4)
+	data15.insert(0, 'THERE14', y)
+	lr = LogisticR()
+	'''
+	#-------------------------------------------------------------------------------
+	# Make prediction for 2016
+	'''
+	data.insert(0, 'INTERCEPT', 1)
+	data15 = data.copy()
+	t3 = data['THERE13']
+	t4 = data['THERE14']
+	data15.drop('THERE12', axis=1, inplace=True)
+	data15.drop('THERE13', axis=1, inplace=True)
+	data15.drop('THERE14', axis=1, inplace=True)
+	data15.insert(0, 'THERE12', t3)
+	data15.insert(0, 'THERE13', t4)
+	data15.insert(0, 'THERE14', y)
+
+	lr.train(data, y, 1, 0.005)
+
+	res = lr.predict(data15)
+	res = (res >= 0.5)
+	res.to_csv('predictionY1logistic.csv', index=True)
 '''
 
 #-------------------------------------------------------------------------------
