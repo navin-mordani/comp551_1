@@ -6,7 +6,14 @@ import pandas as pan
 import math
 import sys
 from numpy import genfromtxt
+import argparse
 
+try:
+    # for Python2
+    from Tkinter import *   ## notice capitalized T in Tkinter
+except ImportError:
+    # for Python3
+    from tkinter import *   ## notice lowercase 't' in tkinter here
 
 def getMatrixFromFile(inputFileName):
     """
@@ -203,12 +210,12 @@ def correlation(X, y, wLinear):
     return np.sum((a) * (b)) / math.sqrt(np.sum(a ** 2) * np.sum(b ** 2)) # return correlation coefficient
 
 
-def main():
+def main(trainXCSV,trainYVector,queriedX,submission):
     """
     read feature vectors and the target vector from file
     """
-    X = getMatrixFromFile('./data/Y2/featureMatrixFinal.csv')
-    y = getMatrixFromFile('./data/Y2/vectorY.csv')
+    X = getMatrixFromFile(trainXCSV)#('../data/Y2/featureMatrixFinal.csv')
+    y = getMatrixFromFile(trainYVector)#('../data/Y2/vectorY.csv')
     # The next 2 lines take the traspose of y to generate y vector
     y = y[np.newaxis]
     y = np.transpose(y)
@@ -239,7 +246,7 @@ def main():
     print('The Correlation between predicted output and the actual output is ', correlation(X,y,wLinear))
     print('The Hypothesis is ',wLinear[0],' * AVG-TIME-YEAR-3 + ',wLinear[1],' * AVG-TIME-YEAR-2 +'
     ,wLinear[2],' * AVG-TIME-YEAR-1 + ',wLinear[3],' * AGE + ',wLinear[4],' * GENDER + ',wLinear[5])
-    fullX = getMatrixFromFile('./data/Y2/XMatrix.csv')
+    fullX = getMatrixFromFile(queriedX)#('../data/Y2/XMatrix.csv')
     allIds = fullX[:,len(fullX[1,:]) - 1]
     fullX = fullX[:,1:len(fullX[1,:]) - 1]
     fullX = Normalize(fullX)
@@ -252,3 +259,17 @@ def main():
     for i in range(len(fullX)):
         finalPrediction.loc[int(allIds[i])]=correctTimeFormat(yPredicted[i]*3600)
     return finalPrediction
+
+
+
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-X', '--trainXCSV',type=str, help='CSV file containing feature matrix X', required=True)
+	parser.add_argument('-y', '--trainYVector',type=str, help='CSV file containing training y vector',required=True)
+	parser.add_argument('-q', '--queriedX',type=str, help='CSV file containing feature matrix X for queried instances', required=True)	
+	parser.add_argument('-s','--submission',type=str, help='Submission File',required=True)
+	args = parser.parse_args()
+	main(args.trainXCSV,args.trainYVector,args.queriedX,args.submission)
+
+	#main()
+	
