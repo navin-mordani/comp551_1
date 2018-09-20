@@ -258,8 +258,9 @@ def main(trainXCSV,trainYVector,queriedX,submission):
     finalPrediction = pan.Series();
     for i in range(len(fullX)):
         finalPrediction.loc[int(allIds[i])]=correctTimeFormat(yPredicted[i]*3600)
+    finalPrediction.to_csv(submission, index=True, header=False)
     return finalPrediction
-
+	
 
 
 if __name__ == "__main__":
