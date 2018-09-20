@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import math
 import scipy.stats
-
+import argparse
 LAPLACE_SMOOTHING = 1
 
 class NaiveB:
@@ -120,8 +120,8 @@ class NaiveB:
 
             trainE, trainTrueE = self.calculateError(trainResult, trainDataY)
             validateE, validateTrueE = self.calculateError(validateResult, validateDataY)
-            print(trainE)
-            print(validateE)
+            #print(trainE)
+            #print(validateE)
             trainError += trainE
             trainTrueError += trainTrueE
             validateError += validateE
@@ -138,28 +138,34 @@ class NaiveB:
         print('True Error:')
         print(1 - validateTrueError/float(k))
 
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-t', '--trainCSV',type=str, help='CSV file containing training data', required=True)
+	parser.add_argument('-s','--submission',type=str, help='Submission File',required=True)
+	args = parser.parse_args()
+	
 
-data = pd.read_csv("./data/Y1/dataForY1LogiAndNaive.csv", low_memory=False)
-y = data['THERE15']
-data.drop('THERE15', axis=1, inplace=True)
-data.drop('PARTICIPANT ID', axis=1, inplace=True)
-t3 = data['THERE13']
-t4 = data['THERE14']
-print('Running Naive Bayes model...')
-naiveModel = NaiveB()
-naiveModel.train(data, y, pd.Series(['d','c','d','d','d','c']))
-dataB15 = data.copy()
-dataB15.drop('THERE12', axis=1, inplace=True)
-dataB15.drop('THERE13', axis=1, inplace=True)
-dataB15.drop('THERE14', axis=1, inplace=True)
-dataB15.insert(2, 'THERE12', t3)
-dataB15.insert(2, 'THERE13', t4)
-dataB15.insert(2, 'THERE14', y)
+	data = pd.read_csv(args.trainCSV, low_memory=False)#("./data/Y1/dataForY1LogiAndNaive.csv", low_memory=False)
+	y = data['THERE15']
+	data.drop('THERE15', axis=1, inplace=True)
+	data.drop('PARTICIPANT ID', axis=1, inplace=True)
+	t3 = data['THERE13']
+	t4 = data['THERE14']
+	print('Running Naive Bayes model...')
+	naiveModel = NaiveB()
+	naiveModel.train(data, y, pd.Series(['d','c','d','d','d','c']))
+	dataB15 = data.copy()
+	dataB15.drop('THERE12', axis=1, inplace=True)
+	dataB15.drop('THERE13', axis=1, inplace=True)
+	dataB15.drop('THERE14', axis=1, inplace=True)
+	dataB15.insert(2, 'THERE12', t3)
+	dataB15.insert(2, 'THERE13', t4)
+	dataB15.insert(2, 'THERE14', y)
 
-naiveModel.train(data, y, pd.Series(['d','c','d','d','d','c']))
-out = naiveModel.predict(dataB15)
-print(out)
-res = out[1].round()
-res.to_csv('bayes.csv', index=True, header=False)
-print(res)
-print(res.sum()/float(1000))
+	naiveModel.crossValidation(data, y, pd.Series(['d','c','d','d','d','c']),2)
+	out = naiveModel.predict(dataB15)
+	#print(out)
+	res = out[1].round()
+	res.to_csv(args.submission, index=True, header=False)#('bayes.csv', index=True, header=False)
+	#print(res)
+	#print(res.sum()/float(1000))
