@@ -1,7 +1,15 @@
 # Mini Project - 1
 ## Predicting Participation and Race Time for Montreal Marathon 2016
 
-Assignment for Comp 551 Fall 2016, McGill University
+Assignment for Comp 551 Fall 2016, McGill University.
+
+### Models Used
+
+All models are coded from scratch.
+
+Linear Regression for predicting race time.
+
+Logistic Regression and Naive Bayes for predicting participation.
 
 ## Instructions
 
@@ -32,6 +40,11 @@ Data cleaning such as row transformation, feature extraction, missing data handl
 
 The cleaned data can be found [in the data folder](https://github.com/navin-mordani/comp551_1/tree/master/data).
 
+## Requirements
+
+```
+requirements.txt
+``` 
 
 ## Authors
 
